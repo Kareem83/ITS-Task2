@@ -49,6 +49,8 @@ namespace ITS_Task.Business.Services
             await _auditLogRepository.AddAsync(auditLog);
         }
 
+        public Task<PagedResultDto<AuditLogDto>> QueryAsync(AuditQueryDto query) => _auditLogRepository.QueryAsync(query);
+
         public async Task<List<AuditLogDto>> GetAllAsync()
         {
             var logs =

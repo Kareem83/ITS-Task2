@@ -1,0 +1,34 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server@sha256:4402d880dd4c34bfa7d8705e56a86cd6c88da80a1f6bbbe741f999e76264a090
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${SQL_PASSWORD:?Set SQL_PASSWORD in .env}
+    volumes:
+      - its-sql-data:/var/opt/mssql
+    healthcheck:
+      test: [CMD-SHELL, '/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+  app:
+    image: its-task-app:local
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=ITS_FullStack_Development;User Id=sa;Password=${SQL_PASSWORD};Encrypt=True;TrustServerCertificate=True
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in .env}
+      Database__Initialize: "true"
+      Seed__Enabled: "true"
+      Seed__IncludeDemo: "true"
+      Seed__DemoPassword: Demo@123
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+volumes:
+  its-sql-data:

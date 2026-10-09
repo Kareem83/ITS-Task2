@@ -33,3 +33,10 @@ public sealed class PagedResultDto<T>
     public int TotalCount { get; set; }
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 }
+
+public sealed class AuditQueryDto : ListQueryDto
+{
+    public string? Action { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+}

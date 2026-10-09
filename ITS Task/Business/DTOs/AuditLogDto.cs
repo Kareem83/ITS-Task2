@@ -3,6 +3,7 @@ namespace ITS_Task.Business.DTOs
     public class AuditLogDto
     {
         public int Id { get; set; }
+        public string? UserName { get; set; }
 
         public string UserId { get; set; } = string.Empty;
 

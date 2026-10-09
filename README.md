@@ -1,4 +1,57 @@
-# ITS Task Backend
+# ITS Task — Full Stack
+
+الواجهة React + TypeScript متصلة بالـ API، وتشمل واجهات Administrator وManager وEmployee، إدارة الموظفين والأقسام وأنواع الإجازات، البحث والفرز والتصفية والصفحات، الأرصدة، طلب الإجازة وإلغائها، الموافقة والرفض، الملف الشخصي وسجل التغييرات. التصميم يدعم الموبايل.
+
+## تشغيل المشروع كاملًا على اللاب
+
+ثبت Docker Desktop وشغله، ثم نزّل الريبو بواسطة Code → Download ZIP وفك الضغط. من مجلد المشروع انسخ `.env.example` إلى `.env`، واضبط SQL_PASSWORD بكلمة قوية وJWT_KEY بقيمة عشوائية لا تقل عن 32 حرفًا. ADMIN_PASSWORD هي كلمة مرور المسؤول عند إنشاء القاعدة أول مرة.
+
+```text
+docker compose up --build -d
+docker compose ps
+```
+
+افتح المتصفح على المنفذ 8080 لجهازك. الواجهة والـ API يعملان من نفس التطبيق، فلا تحتاج تعديل عنوان الربط. أول تشغيل ينشئ قاعدة التطوير المنفصلة ITS_FullStack_Development ويطبق migrations ويضيف حسابات التجربة. SQL Server يحفظ البيانات في volume دائم، وإعادة التشغيل لا تعيد ضبط الأرصدة أو كلمات المرور. التشغيل التالي يستخدم `docker compose up -d`، والإيقاف `docker compose stop`.
+
+| الحساب | البريد | كلمة المرور الافتراضية |
+| --- | --- | --- |
+| Administrator | admin@its.com | قيمة ADMIN_PASSWORD في .env |
+| Manager | manager@its.com | Demo@123 |
+| Employee | employee@its.com | Demo@123 |
+
+هذا إعداد تطوير وتجربة. للإنتاج استخدم SQL Server مُدارًا وأسرارًا مستقلة، ASPNETCORE_ENVIRONMENT=Production، Seed__IncludeDemo=false، Database__Initialize=false، وHTTPS على reverse proxy. طبّق migrations بعد مراجعتها. لا تستخدم حسابات التجربة في الإنتاج. لا تحذف volume أو قاعدة موجودة للحصول على تشغيل جديد.
+
+## تطوير الواجهة والباك اند محليًا
+
+تحتاج .NET SDK 8 وNode.js 22.12 أو أحدث وSQL Server. إعداد Windows LocalDB الافتراضي متاح للباك اند. راجع أقسام الاتصال والـ migrations والـ seed أدناه قبل تجهيز قاعدة بيانات قائمة. Database:Initialize افتراضيًا false، ولا يُفعّل إلا عمدًا لقاعدة تطوير جديدة.
+
+من مجلد المشروع شغّل:
+
+```text
+dotnet run --project "ITS Task/ITS Task.csproj" --launch-profile http
+```
+
+ومن terminal آخر:
+
+```text
+cd frontend
+npm ci
+npm run dev
+```
+
+Vite يستخدم المنفذ 5173 ويمرر `/api` للباك اند على 5019. يمكن تغيير API_PROXY_TARGET أو VITE_API_URL كما هو موضح في frontend/.env.example. المتغيرات VITE عامة في المتصفح؛ لا تضع فيها أسرارًا. تسجيل الدخول يستخدم JWT وrefresh token مع حفظ الجلسة في sessionStorage وإنهائها عند تسجيل الخروج أو رفض التجديد. السيرفر يفرض جميع الصلاحيات.
+
+## اختبارات الواجهة والتكامل الكامل
+
+```text
+cd frontend
+npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+اختبارات Playwright تحتاج الواجهة والباك اند وقاعدة **تطوير منفصلة** شغالة وحسابات seed المذكورة. تنشئ سجلات اختبار جديدة ولا تحذف بيانات. يمكن ضبط E2E_BASE_URL لاختبار الواجهة المجمعة داخل Docker، وCHROMIUM_PATH لاستخدام Chromium مثبت. اختبارات المتصفح تغطي إنشاء قسم وموظف وتعيين مدير، الصلاحيات، تقديم الطلب واعتماده وتحقق الرصيد، الإلغاء والرفض، تعديل وتعطيل نوع الإجازة وعرض الموبايل. التفاصيل والأدلة في Evidence/fullstack-validation.md.
 
 المشروع ASP.NET Core Web API على .NET 8، مع EF Core 8.0.19 وSQL Server وIdentity وJWT. تم الحفاظ على الطبقات والأسماء الأساسية، بما فيها AssignDepartementToEmployee.
 
@@ -166,4 +219,4 @@ dotnet test "ITS Task.sln" --filter "Category=SqlServer"
 
 هذه الاختبارات تغيّر InitialCatalog إلى ITS_Automated_GUID جديد لكل اختبار، وتُطبق migrations والـ seed هناك؛ لا تستخدم قاعدة التطبيق الموجودة ولا تحذف أي قاعدة. يتطلب الحساب صلاحية إنشاء قواعد development، وتبقى القواعد الناتجة متاحة للفحص بعد الاختبار.
 
-إذا لم يكن الاتصال مضبوطًا، الاختبارات الثلاثة تُسجَّل Skipped صراحة. اختبارات SQLite لا تثبت سلوك locks أو migration SQL الخاصة بـ SQL Server. في هذه البيئة فشل تنزيل SQL Server بسبب حظر centralus.data.mcr.microsoft.com؛ لذلك لم تُنفذ هذه الاختبارات هنا.
+إذا لم يكن الاتصال مضبوطًا، الاختبارات الثلاثة تُسجَّل Skipped صراحة. اختبارات SQLite لا تثبت سلوك locks أو migration SQL الخاصة بـ SQL Server. في التحقق الحالي نُفذت الاختبارات الثلاثة على SQL Server 2022 ونجحت دون تخطي.

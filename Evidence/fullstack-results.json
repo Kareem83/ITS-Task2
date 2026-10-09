@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-09",
+  "backend": {
+    "passed": 105,
+    "failed": 0,
+    "skipped": 0,
+    "unit": 46,
+    "sqliteIntegration": 56,
+    "sqlServer": 3
+  },
+  "frontend": {
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0,
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "npmAuditVulnerabilities": 0
+  },
+  "browser": {
+    "developmentSuitesPassed": 2,
+    "dockerSuitesPassed": 2
+  },
+  "dockerBuild": "passed",
+  "composeStartup": "passed",
+  "modelHasPendingChanges": false,
+  "userDatabaseModified": false
+}

@@ -1,4 +1,5 @@
 using ITS_Task.Models;
+using ITS_Task.Business.DTOs;
 
 namespace ITS_Task.DataAccess.Interfaces
 {
@@ -8,5 +9,6 @@ namespace ITS_Task.DataAccess.Interfaces
             AuditLog auditLog);
 
         Task<List<AuditLog>> GetAllAsync();
+        Task<PagedResultDto<AuditLogDto>> QueryAsync(AuditQueryDto query);
     }
 }

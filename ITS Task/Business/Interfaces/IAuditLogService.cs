@@ -11,5 +11,6 @@ namespace ITS_Task.Business.Interfaces
             string? details = null);
 
         Task<List<AuditLogDto>> GetAllAsync();
+        Task<PagedResultDto<AuditLogDto>> QueryAsync(AuditQueryDto query);
     }
 }

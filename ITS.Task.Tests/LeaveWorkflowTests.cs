@@ -187,6 +187,7 @@ public partial class ApiTests
     private sealed class FailingAudit : IAuditLogService
     {
         public Task LogAsync(string action, string entityName, string entityId, string? details = null) => throw new InvalidOperationException("Audit unavailable");
+        public Task<PagedResultDto<AuditLogDto>> QueryAsync(AuditQueryDto query) => throw new NotSupportedException();
         public Task<List<AuditLogDto>> GetAllAsync() => throw new NotSupportedException();
     }
 }

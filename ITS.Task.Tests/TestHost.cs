@@ -18,7 +18,7 @@ public sealed class TestHost : WebApplicationFactory<Program>
         builder.UseEnvironment("Development");
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Seed:Enabled"] = "false", ["Seed:AdminPassword"] = "Admin@123", ["Seed:DemoPassword"] = "Demo@123",
+            ["Database:Initialize"] = "false", ["Seed:Enabled"] = "false", ["Seed:AdminPassword"] = "Admin@123", ["Seed:DemoPassword"] = "Demo@123",
             ["Jwt:Key"] = "Unit-Testing-Signing-Key-At-Least-32-Bytes-2026", ["Jwt:Issuer"] = "ITS.Tests", ["Jwt:Audience"] = "ITS.Tests", ["Jwt:DurationInMinutes"] = "10"
         }));
         builder.ConfigureServices(services =>

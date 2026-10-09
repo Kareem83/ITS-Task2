@@ -338,6 +338,7 @@ namespace ITS_Task.Business.Services
                 new LeaveBalanceDto
                 {
                     Id = x.Id,
+                    IsActive = x.LeaveType.IsActive,
                     LeaveTypeId = x.LeaveTypeId,
                     LeaveTypeName =
                         x.LeaveType.Name,

@@ -19,6 +19,10 @@ namespace ITS_Task.Controllers
                 leaveTypeService;
         }
 
+        [Authorize(Roles = "Administrator,Manager")]
+        [HttpGet("options")]
+        public async Task<IActionResult> GetOptions() => Ok(await _leaveTypeService.GetAllAsync());
+
         [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<IActionResult> GetAll()

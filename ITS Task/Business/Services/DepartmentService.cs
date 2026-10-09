@@ -3,11 +3,20 @@ using ITS_Task.Business.Exceptions;
 using ITS_Task.Business.Interfaces;
 using ITS_Task.DataAccess.Interfaces;
 using ITS_Task.Models;
+using ITS_Task.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 namespace ITS_Task.Business.Services;
-public sealed class DepartmentService(IDepartmentRepository repository, ITransactionRunner transactions) : IDepartmentService
+public sealed class DepartmentService(IDepartmentRepository repository, ITransactionRunner transactions, AppDbContext context) : IDepartmentService
 {
     private static DepartmentDto Map(Department d) => new() { Id = d.Id, Name = d.Name };
     private static string Name(SaveDepartmentDto dto) => !string.IsNullOrWhiteSpace(dto.Name) && dto.Name.Trim().Length <= 100 ? dto.Name.Trim() : throw new ApiException(400, "Invalid department name");
+    public async Task<List<DepartmentDto>> GetTeamOptionsAsync(ClaimsPrincipal user)
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new ApiException(401, "Authentication required");
+        var manager = await context.Employees.SingleOrDefaultAsync(e => e.UserId == userId && e.IsActive) ?? throw new ApiException(404, "Manager profile not found");
+        return await context.Departments.Where(d => d.Employees.Any(e => e.ManagerId == manager.Id)).OrderBy(d => d.Name).Select(d => new DepartmentDto { Id = d.Id, Name = d.Name }).ToListAsync();
+    }
     public async Task<List<DepartmentDto>> GetAllAsync() => (await repository.GetAllAsync()).Select(Map).ToList();
     public async Task<DepartmentDto?> GetByIdAsync(int id) { var d = await repository.GetByIdAsync(id); return d == null ? null : Map(d); }
     public Task<DepartmentDto> CreateAsync(SaveDepartmentDto dto) => transactions.RunAsync(async () =>

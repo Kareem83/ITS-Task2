@@ -170,13 +170,28 @@ namespace ITS_Task
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseAuthentication();
 
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapGet("/api/health", async (AppDbContext db) => await db.Database.CanConnectAsync()
+                ? Results.Ok(new { status = "ready" })
+                : Results.StatusCode(503));
+            app.MapFallback("/api/{**path}", () => Results.NotFound());
+            app.MapFallbackToFile("index.html");
+
+            if (builder.Configuration.GetValue<bool>("Database:Initialize"))
+            {
+                if (!app.Environment.IsDevelopment()) throw new InvalidOperationException("Automatic database initialization is only allowed in Development");
+                using var scope = app.Services.CreateScope();
+                await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+            }
 
             if (builder.Configuration.GetValue<bool>("Seed:Enabled"))
             {

@@ -5,3 +5,8 @@ TestResults/
 *.user
 *.suo
 .env
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+playwright-report/
+test-results/

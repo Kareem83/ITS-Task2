@@ -14,7 +14,7 @@ public class EmployeeService(IEmployeeRepository repository, IAuditLogService au
     {
         EmployeeId = employee.Id, FullName = employee.FullName, Email = employee.Email,
         DepartmentId = employee.DepartmentId, DepartmentName = employee.Department.Name,
-        JobTitle = employee.JobTitle, HireDate = employee.HireDate, ManagerId = employee.ManagerId, IsActive = employee.IsActive
+        JobTitle = employee.JobTitle, HireDate = employee.HireDate, ManagerId = employee.ManagerId, IsActive = employee.IsActive, HasAccount = employee.UserId != null
     };
     private static void Check(IdentityResult result)
     {
@@ -39,7 +39,10 @@ public class EmployeeService(IEmployeeRepository repository, IAuditLogService au
         if (manager != null) managerId = (await GetMyProfileAsync(manager)).EmployeeId;
         if (!string.IsNullOrWhiteSpace(query.Role) && !new[] { "Administrator", "Manager", "Employee" }.Contains(query.Role)) throw new ApiException(400, "Invalid role");
         var result = await repository.QueryAsync(query, managerId);
-        return new() { Employees = result.Employees.Select(Map).ToList(), Page = query.Page, PageSize = query.PageSize, TotalCount = result.TotalCount, TotalPages = (int)Math.Ceiling(result.TotalCount / (double)query.PageSize) };
+        var ids = result.Employees.Select(e => e.UserId).Where(id => id != null).ToList();
+        var memberships = await context.UserRoles.Where(ur => ids.Contains(ur.UserId)).Join(context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, r.Name }).ToListAsync();
+        var dtos = result.Employees.Select(e => { var dto = Map(e); dto.Roles = memberships.Where(m => m.UserId == e.UserId && m.Name != null).Select(m => m.Name!).OrderBy(r => r).ToList(); return dto; }).ToList();
+        return new() { Employees = dtos, Page = query.Page, PageSize = query.PageSize, TotalCount = result.TotalCount, TotalPages = (int)Math.Ceiling(result.TotalCount / (double)query.PageSize) };
     }
     public Task<EmployeePagedResultDto> GetAllAsync(int? departmentId, int? managerId, bool? isActive, string? role, int page, int pageSize, string sortBy, string sortOrder)
         => QueryAsync(new() { DepartmentId = departmentId, ManagerId = managerId, IsActive = isActive, Role = role, Page = page, PageSize = pageSize, SortBy = sortBy, SortOrder = sortOrder });
