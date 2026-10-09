@@ -1,0 +1,12 @@
+  ITS Task -> /tmp/its-package-check/ITS Back Task/ITS Task/bin/Release/net8.0/ITS Task.dll
+  ITS.Task.Tests -> /tmp/its-package-check/ITS Back Task/ITS.Task.Tests/bin/Release/net8.0/ITS.Task.Tests.dll
+Test run for /tmp/its-package-check/ITS Back Task/ITS.Task.Tests/bin/Release/net8.0/ITS.Task.Tests.dll (.NETCoreApp,Version=v8.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:20.34]     ITS_Task.Tests.SqlServerConcurrencyTests.ConcurrentApprovalAndRejectionHaveOneWinner [SKIP]
+[xUnit.net 00:00:20.34]     ITS_Task.Tests.SqlServerConcurrencyTests.ConcurrentSubmissionsCannotOverlapOrDoubleReserve [SKIP]
+[xUnit.net 00:00:20.34]     ITS_Task.Tests.SqlServerConcurrencyTests.SimultaneousApprovalsDeductOnce [SKIP]
+  Skipped ITS_Task.Tests.SqlServerConcurrencyTests.ConcurrentApprovalAndRejectionHaveOneWinner [1 ms]
+  Skipped ITS_Task.Tests.SqlServerConcurrencyTests.ConcurrentSubmissionsCannotOverlapOrDoubleReserve [1 ms]
+  Skipped ITS_Task.Tests.SqlServerConcurrencyTests.SimultaneousApprovalsDeductOnce [1 ms]
+
+Passed!  - Failed:     0, Passed:    96, Skipped:     3, Total:    99, Duration: 20 s - ITS.Task.Tests.dll (net8.0)
